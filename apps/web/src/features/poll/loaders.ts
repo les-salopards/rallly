@@ -16,6 +16,7 @@ import {
   listPollComments,
   listPollParticipants,
 } from "@/features/poll/data";
+import { getGroupAccess } from "@/features/poll/group-access/data";
 import { getPollInvitePath } from "@/features/poll/invite/utils";
 import {
   filterCommentsForViewer,
@@ -182,6 +183,11 @@ export const loadInvitePoll = cache(
 
     const user = session?.user ?? null;
     const viewer = { userId: user?.id ?? null, linkedParticipantIds };
+    const groupAccess = await getGroupAccess({
+      pollId,
+      allowedGroup: poll.allowedGroup,
+      user,
+    });
 
     return {
       poll,
@@ -196,6 +202,7 @@ export const loadInvitePoll = cache(
         hideParticipants: poll.hideParticipants,
       }),
       linkedParticipantIds,
+      groupAccess,
       user,
     };
   },

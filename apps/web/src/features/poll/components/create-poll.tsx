@@ -147,6 +147,7 @@ export const CreatePoll = ({
       hideParticipants: false,
       enableComments: false,
       allowTentativeVotes: true,
+      allowedGroup: "",
       duration: 60,
       lockTimeZone: false,
       allDay: false,
@@ -216,6 +217,7 @@ export const CreatePoll = ({
               hideScores: formData?.hideScores,
               allowTentativeVotes: formData?.allowTentativeVotes,
               requireParticipantEmail: formData?.requireParticipantEmail,
+              allowedGroup: formData?.allowedGroup,
               options: required(formData?.options).map((option) => ({
                 startDate: option.type === "date" ? option.date : option.start,
                 endDate: option.type === "timeSlot" ? option.end : undefined,

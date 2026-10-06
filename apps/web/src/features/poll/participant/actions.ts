@@ -14,6 +14,10 @@ import {
   hasPollAdminAccess,
   listParticipantIdsByToken,
 } from "@/features/poll/data";
+import {
+  getPollGroupAccess,
+  isGroupAccessDenied,
+} from "@/features/poll/group-access/data";
 import { getPollInvitePath } from "@/features/poll/invite/utils";
 import {
   addParticipant,
@@ -179,6 +183,13 @@ export const addParticipantAction = anyUserActionClient
   .inputSchema(addParticipantSchema)
   .action(async ({ ctx, parsedInput }) => {
     const { pollId, votes, name, email, note, timeZone, token } = parsedInput;
+
+    // A poll reserved to an OIDC group only takes responses from its members.
+    const groupAccess = await getPollGroupAccess({ pollId, user: ctx.user });
+    if (isGroupAccessDenied(groupAccess)) {
+      return { ok: false as const, reason: groupAccess };
+    }
+
     const locale = await getLocale();
 
     const result = await addParticipant({
@@ -280,6 +291,16 @@ export const updateParticipantVotesAction = optionalUserActionClient
     }
 
     const { participant, actor } = authorization;
+
+    // The emailed edit link alone does not get around a group restriction:
+    // the member check applies to whoever holds the session.
+    const groupAccess = await getPollGroupAccess({
+      pollId: participant.pollId,
+      user: ctx.user,
+    });
+    if (isGroupAccessDenied(groupAccess)) {
+      return { ok: false as const, reason: groupAccess };
+    }
 
     const result = await updateParticipantVotes({
       participantId,
