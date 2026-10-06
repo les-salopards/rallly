@@ -27,6 +27,8 @@ export type PollSettingsFormData = {
   hideScores: boolean;
   enableComments: boolean;
   allowTentativeVotes: boolean;
+  /** OIDC group the poll is reserved to; empty when open to anyone. */
+  allowedGroup: string;
 };
 
 export type NewEventData = PollDetailsData &

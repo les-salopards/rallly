@@ -8,6 +8,10 @@ import {
   listParticipantIdsByToken,
 } from "@/features/poll/data";
 import {
+  getGroupAccess,
+  isGroupAccessDenied,
+} from "@/features/poll/group-access/data";
+import {
   countParticipants,
   getOptionScores,
   getViewerResponse,
@@ -47,17 +51,24 @@ export const loadVotePage = cache(
       participantIds,
     });
 
-    const [response, scores, participantCount] = await Promise.all([
-      responsePromise,
-      // Scores stay hidden until the viewer has responded, so they are not
-      // read at all when they cannot be shown.
-      poll.hideScores
-        ? responsePromise.then((found) =>
-            found ? getOptionScores({ pollId }) : null,
-          )
-        : getOptionScores({ pollId }),
-      countParticipants({ pollId }),
-    ]);
+    const [response, scores, participantCount, groupAccess] = await Promise.all(
+      [
+        responsePromise,
+        // Scores stay hidden until the viewer has responded, so they are not
+        // read at all when they cannot be shown.
+        poll.hideScores
+          ? responsePromise.then((found) =>
+              found ? getOptionScores({ pollId }) : null,
+            )
+          : getOptionScores({ pollId }),
+        countParticipants({ pollId }),
+        getGroupAccess({
+          pollId,
+          allowedGroup: poll.allowedGroup,
+          user: session?.user ?? null,
+        }),
+      ],
+    );
 
     // hideScores reveals the tally only once the viewer has responded.
     const scoresVisible = !poll.hideScores || response !== null;
@@ -106,7 +117,7 @@ export const loadVotePage = cache(
             : null,
       })),
       response,
-      canVote: poll.status === "open",
+      canVote: poll.status === "open" && !isGroupAccessDenied(groupAccess),
     };
   },
 );
