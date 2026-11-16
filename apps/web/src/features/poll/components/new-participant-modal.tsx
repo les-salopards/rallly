@@ -29,7 +29,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { IfCloudHosted } from "@/components/environment";
 import { Link } from "@/components/link";
-import { usePollOrNull } from "@/features/poll/client";
+import { useIdentityLocked, usePollOrNull } from "@/features/poll/client";
 import {
   useAddParticipant,
   useEditToken,
@@ -131,6 +131,7 @@ const VoteSummary = ({
 export const NewParticipantForm = (props: NewParticipantModalProps) => {
   const { t } = useTranslation();
   const poll = usePollOrNull();
+  const identityLocked = useIdentityLocked();
 
   const isEmailRequired =
     props.requireParticipantEmail ?? poll?.requireParticipantEmail ?? false;
@@ -163,6 +164,10 @@ export const NewParticipantForm = (props: NewParticipantModalProps) => {
           defaultValue: "This poll is no longer accepting responses.",
         });
       case "loginRequired":
+        return t("oidcVoteLoginRequired", {
+          defaultValue:
+            "Sign in to respond: every response is tied to an account.",
+        });
       case "notMember":
         return t("newParticipantFormErrorGroupRestricted", {
           defaultValue: "This poll is reserved to the members of a group.",
@@ -306,8 +311,9 @@ export const NewParticipantForm = (props: NewParticipantModalProps) => {
                   <Input
                     className="w-full"
                     {...passwordManagerIgnoreProps}
-                    autoFocus={true}
+                    autoFocus={!identityLocked}
                     disabled={formState.isSubmitting}
+                    readOnly={identityLocked}
                     placeholder={t("namePlaceholder")}
                     {...field}
                   />
@@ -332,6 +338,7 @@ export const NewParticipantForm = (props: NewParticipantModalProps) => {
                     className="w-full"
                     {...passwordManagerIgnoreProps}
                     disabled={formState.isSubmitting}
+                    readOnly={identityLocked}
                     placeholder={t("emailPlaceholder")}
                     {...field}
                   />

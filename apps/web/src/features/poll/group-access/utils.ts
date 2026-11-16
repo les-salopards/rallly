@@ -40,21 +40,28 @@ export function readGroupsFromIdToken(
 /**
  * `groups` is null when the viewer has no OIDC identity at all, which is a
  * different answer (sign in) from an identity outside the group (refused).
+ * `oidcRequired` (OIDC_VOTE_REQUIRED) extends the sign-in requirement to
+ * every poll, with or without a group.
  */
 export function evaluateGroupAccess({
   allowedGroup,
   isGuest,
   groups,
+  oidcRequired = false,
 }: {
   allowedGroup: string | null;
   isGuest: boolean;
   groups: string[] | null;
+  oidcRequired?: boolean;
 }): GroupAccess {
-  if (!allowedGroup) {
+  if (!allowedGroup && !oidcRequired) {
     return "open";
   }
   if (isGuest || groups === null) {
     return "loginRequired";
+  }
+  if (!allowedGroup) {
+    return "allowed";
   }
   return groups.includes(allowedGroup) ? "allowed" : "notMember";
 }
