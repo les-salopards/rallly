@@ -562,6 +562,8 @@
   "noUsersDescription": "Essayez de modifier votre recherche",
   "noVotes": "Personne n'a voté pour cette option",
   "oidcAutoSignInDescription": "Vous êtes redirigé vers la page de connexion...",
+  "oidcVoteLoginRequired": "Connectez-vous pour répondre : chaque réponse est liée à un compte.",
+  "oidcVoteSignedInAs": "Vous répondez en tant que {name} ({email}).",
   "openPollCount": "{count, plural, one {# ouvert}  other {# ouverts}}",
   "optionalLabel": "(Facultatif)",
   "optionCount": "{count, plural, one {# option} other {# options}}",

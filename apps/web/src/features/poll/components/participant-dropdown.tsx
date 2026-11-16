@@ -35,7 +35,7 @@ import { useForm } from "react-hook-form";
 import { useCopyToClipboard, useMount } from "react-use";
 import * as z from "zod";
 
-import { usePoll } from "@/features/poll/client";
+import { useIdentityLocked, usePoll } from "@/features/poll/client";
 import {
   useDeleteParticipant,
   useEditToken,
@@ -70,6 +70,7 @@ export const ParticipantDropdown = ({
     React.useState(false);
   const [isDeleteParticipantModalVisible, setIsDeleteParticipantModalVisible] =
     React.useState(false);
+  const identityLocked = useIdentityLocked();
 
   return (
     <>
@@ -97,10 +98,12 @@ export const ParticipantDropdown = ({
             <PencilIcon />
             <Trans i18nKey="editVotes" defaults="Edit votes" />
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setIsChangeNameModalVisible(true)}>
-            <TagIcon />
-            <Trans i18nKey="changeName" defaults="Change name" />
-          </DropdownMenuItem>
+          {identityLocked ? null : (
+            <DropdownMenuItem onClick={() => setIsChangeNameModalVisible(true)}>
+              <TagIcon />
+              <Trans i18nKey="changeName" defaults="Change name" />
+            </DropdownMenuItem>
+          )}
           {participant.editUrl ? (
             <CopyEditLinkMenuItem
               editUrl={participant.editUrl}

@@ -8,6 +8,7 @@ import {
   evaluateGroupAccess,
   readGroupsFromIdToken,
 } from "@/features/poll/group-access/utils";
+import { isOidcVoteRequired } from "@/features/poll/oidc-vote/constants";
 
 /**
  * The groups the IdP asserted at the user's last OIDC sign-in, or null when
@@ -29,9 +30,9 @@ export async function getUserOidcGroups(userId: string) {
 }
 
 /**
- * Whether this viewer may respond to a poll reserved to a group. The poll's
- * organizers keep full access so they can manage responses on their own
- * poll whatever their groups.
+ * Whether this viewer may respond to a poll: the single "can vote?" gate
+ * shared by group-restricted polls and OIDC_VOTE_REQUIRED. The poll's
+ * organizers bypass the group, not the OIDC identity.
  */
 export async function getGroupAccess({
   pollId,
@@ -42,7 +43,9 @@ export async function getGroupAccess({
   allowedGroup: string | null;
   user: { id: string; isGuest: boolean } | null;
 }): Promise<GroupAccess> {
-  if (!allowedGroup) {
+  const oidcRequired = isOidcVoteRequired();
+
+  if (!allowedGroup && !oidcRequired) {
     return "open";
   }
 
@@ -50,14 +53,17 @@ export async function getGroupAccess({
     return "loginRequired";
   }
 
-  if (await hasPollAdminAccess(pollId, user.id)) {
-    return "allowed";
+  const groups = await getUserOidcGroups(user.id);
+
+  if (allowedGroup && (await hasPollAdminAccess(pollId, user.id))) {
+    return oidcRequired && groups === null ? "loginRequired" : "allowed";
   }
 
   return evaluateGroupAccess({
     allowedGroup,
     isGuest: false,
-    groups: await getUserOidcGroups(user.id),
+    groups,
+    oidcRequired,
   });
 }
 

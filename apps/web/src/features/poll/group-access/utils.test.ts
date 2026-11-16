@@ -96,6 +96,52 @@ describe("evaluateGroupAccess", () => {
   });
 });
 
+describe("evaluateGroupAccess with OIDC required to vote", () => {
+  it("asks a guest to sign in on a poll without a group", () => {
+    expect(
+      evaluateGroupAccess({
+        allowedGroup: null,
+        isGuest: true,
+        groups: null,
+        oidcRequired: true,
+      }),
+    ).toBe("loginRequired");
+  });
+
+  it("asks a user without an OIDC identity to sign in", () => {
+    expect(
+      evaluateGroupAccess({
+        allowedGroup: null,
+        isGuest: false,
+        groups: null,
+        oidcRequired: true,
+      }),
+    ).toBe("loginRequired");
+  });
+
+  it("allows any OIDC user on a poll without a group", () => {
+    expect(
+      evaluateGroupAccess({
+        allowedGroup: null,
+        isGuest: false,
+        groups: [],
+        oidcRequired: true,
+      }),
+    ).toBe("allowed");
+  });
+
+  it("still applies the group on a restricted poll", () => {
+    expect(
+      evaluateGroupAccess({
+        allowedGroup: "rallly-users",
+        isGuest: false,
+        groups: ["rallly-admins"],
+        oidcRequired: true,
+      }),
+    ).toBe("notMember");
+  });
+});
+
 describe("normalizeAllowedGroup", () => {
   it("trims the name and clears blanks", () => {
     expect(normalizeAllowedGroup("  rallly-users ")).toBe("rallly-users");

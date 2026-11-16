@@ -18,6 +18,7 @@ import { PollAdminMenu } from "@/features/poll/components/poll-admin-menu";
 import { LegacyPollContextProvider } from "@/features/poll/components/poll-context-provider";
 import { PollPrimaryActions } from "@/features/poll/components/poll-primary-actions";
 import { loadAdminPoll, loadPoll } from "@/features/poll/loaders";
+import { isOidcVoteRequired } from "@/features/poll/oidc-vote/constants";
 import { Trans } from "@/i18n/client";
 import { isFeatureEnabled } from "@/lib/feature-flags/server";
 import { PollDetailSheet } from "./poll-detail-sheet";
@@ -49,6 +50,7 @@ async function PollHeaderActions({
       participants={participants}
       comments={comments}
       viewerRole="admin"
+      identityLocked={isOidcVoteRequired()}
     >
       <LegacyPollContextProvider>
         <PollAdminMenu />

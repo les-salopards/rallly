@@ -130,15 +130,19 @@ export const VotingForm = ({ children }: React.PropsWithChildren) => {
                   ? t("pollClosedDescription", {
                       defaultValue: "No more responses are being accepted.",
                     })
-                  : result.reason === "loginRequired" ||
-                      result.reason === "notMember"
-                    ? t("newParticipantFormErrorGroupRestricted", {
+                  : result.reason === "loginRequired"
+                    ? t("oidcVoteLoginRequired", {
                         defaultValue:
-                          "This poll is reserved to the members of a group.",
+                          "Sign in to respond: every response is tied to an account.",
                       })
-                    : t("actionErrorInternalServerError", {
-                        defaultValue: "An internal server error occurred",
-                      }),
+                    : result.reason === "notMember"
+                      ? t("newParticipantFormErrorGroupRestricted", {
+                          defaultValue:
+                            "This poll is reserved to the members of a group.",
+                        })
+                      : t("actionErrorInternalServerError", {
+                          defaultValue: "An internal server error occurred",
+                        }),
               );
               return;
             }
