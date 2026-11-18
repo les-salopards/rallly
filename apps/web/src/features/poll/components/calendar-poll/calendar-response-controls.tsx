@@ -1,10 +1,15 @@
 import { Button } from "@rallly/ui/button";
 import { PencilIcon, PlusIcon } from "lucide-react";
-import { useParticipants, usePermissions } from "@/features/poll/client";
+import {
+  useParticipants,
+  usePermissions,
+  useRole,
+} from "@/features/poll/client";
 import { VotingFooter } from "@/features/poll/components/voting-footer";
 import { useVotingForm } from "@/features/poll/components/voting-form";
 import { useUser } from "@/features/user/client";
 import { Trans } from "@/i18n/client";
+import { findViewerParticipant } from "./utils";
 
 /**
  * The table carries its response controls in its rows, so the calendar
@@ -17,7 +22,12 @@ export function CalendarResponseControls() {
   const { ownsObject } = useUser();
   const { canAddNewParticipant, canEditParticipant } = usePermissions();
   const mode = votingForm.watch("mode");
-  const ownParticipant = participants.find((p) => ownsObject(p));
+  const role = useRole();
+  const ownParticipant = findViewerParticipant(participants, {
+    role,
+    owns: ownsObject,
+    canEdit: canEditParticipant,
+  });
 
   if (mode !== "view") {
     return (

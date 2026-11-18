@@ -19,8 +19,8 @@ export function CalendarSlot({
 }: {
   /** The slot's time range; null for an all-day option. */
   label: string | null;
-  /** How many participants said yes. */
-  score: number;
+  /** How many participants said yes; null when the poll hides scores. */
+  score: number | null;
   vote?: VoteType;
   editable: boolean;
   allowTentativeVotes: boolean;
@@ -42,10 +42,12 @@ export function CalendarSlot({
     >
       <VoteIcon type={vote} size="sm" />
       <span className="min-w-0 flex-1 truncate tabular-nums">{label}</span>
-      <span className="inline-flex items-center gap-0.5 text-muted-foreground tabular-nums">
-        <UsersIcon className="size-3" />
-        {score}
-      </span>
+      {score === null ? null : (
+        <span className="inline-flex items-center gap-0.5 text-muted-foreground tabular-nums">
+          <UsersIcon className="size-3" />
+          {score}
+        </span>
+      )}
     </button>
   );
 }

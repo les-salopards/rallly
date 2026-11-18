@@ -1,6 +1,11 @@
 import * as React from "react";
-import { useParticipants } from "@/features/poll/client";
+import {
+  useParticipants,
+  usePermissions,
+  useRole,
+} from "@/features/poll/client";
 import { useOptions, usePoll } from "@/features/poll/components/poll-context";
+import { useVisibility } from "@/features/poll/components/visibility";
 import { useVotingForm } from "@/features/poll/components/voting-form";
 import type { VoteType } from "@/features/poll/constants";
 import { useUser } from "@/features/user/client";
@@ -8,7 +13,7 @@ import { useDateTimeConfig } from "@/lib/datetime/client";
 import { getCalendarDate } from "@/lib/datetime/utils";
 import { getBrowserTimeZone } from "@/lib/utils/date-time-utils";
 import type { CalendarSlotModel } from "./calendar-day";
-import { groupOptionsByDay } from "./utils";
+import { findViewerParticipant, groupOptionsByDay } from "./utils";
 
 /**
  * Everything the calendar views need, read from the same poll context and
@@ -27,7 +32,14 @@ export function useCalendarModel() {
   const mode = votingForm.watch("mode");
   const formVotes = votingForm.watch("votes");
   const editable = mode !== "view";
-  const ownParticipant = participants.find((p) => ownsObject(p));
+  const { canEditParticipant } = usePermissions();
+  const role = useRole();
+  const { canSeeScores } = useVisibility();
+  const ownParticipant = findViewerParticipant(participants, {
+    role,
+    owns: ownsObject,
+    canEdit: canEditParticipant,
+  });
 
   const days = React.useMemo(
     () =>
@@ -67,7 +79,7 @@ export function useCalendarModel() {
       return {
         optionId,
         label: labels.get(optionId) ?? null,
-        score: getScore(optionId).yes,
+        score: canSeeScores ? getScore(optionId).yes : null,
         vote,
       };
     });
@@ -88,5 +100,6 @@ export function useCalendarModel() {
     onVote,
     editable,
     allowTentativeVotes: poll.allowTentativeVotes,
+    ownParticipant,
   };
 }

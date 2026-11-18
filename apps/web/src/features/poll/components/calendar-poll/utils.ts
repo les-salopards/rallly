@@ -91,3 +91,25 @@ export function splitVisible<T>(
     hidden: Math.max(0, items.length - max),
   };
 }
+
+/**
+ * The viewer's own response, with the voting form's rule: the one their
+ * account owns, else, for a participant, one they may edit (opened through
+ * its emailed edit link). Admins may edit every response, so the fallback
+ * never applies to them.
+ */
+export function findViewerParticipant<T extends { id: string }>(
+  participants: T[],
+  viewer: {
+    role: string;
+    owns: (participant: T) => boolean;
+    canEdit: (participantId: string) => boolean;
+  },
+): T | undefined {
+  return (
+    participants.find((participant) => viewer.owns(participant)) ??
+    (viewer.role === "participant"
+      ? participants.find((participant) => viewer.canEdit(participant.id))
+      : undefined)
+  );
+}
