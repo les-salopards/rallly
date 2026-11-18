@@ -58,4 +58,10 @@ describe("CalendarSlot", () => {
     expect(button.textContent).toContain("10:00");
     expect(button.textContent).not.toContain("3");
   });
+
+  it("exposes the full time range on hover", () => {
+    const { button } = renderSlot({ label: "10:00", title: "10:00 – 11:00" });
+
+    expect(button.getAttribute("title")).toBe("10:00 – 11:00");
+  });
 });

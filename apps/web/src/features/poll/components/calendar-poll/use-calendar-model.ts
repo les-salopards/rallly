@@ -56,8 +56,11 @@ export function useCalendarModel() {
         options.map((option) => [
           option.optionId,
           option.type === "timeSlot"
-            ? `${option.startTime} – ${option.endTime}`
-            : null,
+            ? {
+                label: option.startTime,
+                range: `${option.startTime} – ${option.endTime}`,
+              }
+            : { label: null, range: null },
         ]),
       ),
     [options],
@@ -78,7 +81,8 @@ export function useCalendarModel() {
           : undefined;
       return {
         optionId,
-        label: labels.get(optionId) ?? null,
+        label: labels.get(optionId)?.label ?? null,
+        range: labels.get(optionId)?.range ?? null,
         score: canSeeScores ? getScore(optionId).yes : null,
         vote,
       };

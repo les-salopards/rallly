@@ -155,7 +155,11 @@ export function CalendarPoll() {
             <p className="font-medium text-sm">
               {formatDay(activeDay, locale)}
             </p>
-            <CalendarSlotList slots={model.getSlots(activeDay)} {...handlers} />
+            <CalendarSlotList
+              slots={model.getSlots(activeDay)}
+              full
+              {...handlers}
+            />
           </div>
         ) : null}
       </div>
