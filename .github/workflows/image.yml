@@ -1,0 +1,98 @@
+# Fork CI: type check and unit tests, then the self-hosted image.
+# Pull requests build the image without pushing it. Pushes to main publish it
+# to GHCR (sha-<short sha> and latest) and scan it with the shared security
+# scan of projet-infra, which the Compose stack and the VM then pull.
+name: Image
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: ghcr.io/les-salopards/rallly
+
+jobs:
+  check:
+    name: Type check and unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node
+      - uses: ./.github/actions/pnpm-install
+
+      - name: Generate Prisma Client
+        run: pnpm db:generate
+
+      - name: Check types
+        run: pnpm type-check
+
+      - name: Run unit tests
+        run: pnpm test:unit
+
+  image:
+    name: Build and publish image
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      tag: ${{ steps.vars.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute the image tag
+        id: vars
+        run: echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # amd64 only: the Énov VM is x86 and a single platform keeps the build
+      # within a few minutes.
+      - name: Build (and push on main)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          platforms: linux/amd64
+          build-args: |
+            SELF_HOSTED=true
+            APP_VERSION=${{ steps.vars.outputs.tag }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ env.IMAGE }}:${{ steps.vars.outputs.tag }}
+            ${{ env.IMAGE }}:latest
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  scan:
+    name: Security scan
+    needs: image
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      packages: read
+    uses: les-salopards/projet-infra/.github/workflows/security-scan.yml@main
+    with:
+      images: ghcr.io/les-salopards/rallly:${{ needs.image.outputs.tag }}
