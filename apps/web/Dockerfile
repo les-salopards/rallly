@@ -44,7 +44,10 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 # Install required system packages for Prisma
 # (see https://www.prisma.io/docs/orm/reference/system-requirements)
+# The upgrade pulls Debian security fixes the node base tag may lag behind on
+# (perl-base had three critical CVEs fixed only in the archive).
 RUN apt-get update \
+  && apt-get upgrade -y --no-install-recommends \
   && apt-get install -y --no-install-recommends \
     openssl \
     zlib1g \
