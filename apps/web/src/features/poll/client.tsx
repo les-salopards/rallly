@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { useRequiredContext } from "@/components/use-required-context";
+import type { GroupAccess } from "@/features/poll/group-access/utils";
 import type {
   PollComment,
   PollDetails,
@@ -20,6 +21,8 @@ type PollContextValue = {
   linkedParticipantIds: string[];
   /** Which surface the page is: the host's admin page or the invite page. */
   viewerRole: "admin" | "participant";
+  /** The viewer's standing on a poll reserved to an OIDC group. */
+  groupAccess: GroupAccess;
 };
 
 const PollContext = React.createContext<PollContextValue | null>(null);
@@ -37,14 +40,30 @@ export function PollProvider({
   comments,
   linkedParticipantIds = [],
   viewerRole,
+  groupAccess = "open",
   children,
-}: Omit<PollContextValue, "linkedParticipantIds"> & {
+}: Omit<PollContextValue, "linkedParticipantIds" | "groupAccess"> & {
   linkedParticipantIds?: string[];
+  groupAccess?: GroupAccess;
   children: React.ReactNode;
 }) {
   const value = React.useMemo(
-    () => ({ poll, participants, comments, linkedParticipantIds, viewerRole }),
-    [poll, participants, comments, linkedParticipantIds, viewerRole],
+    () => ({
+      poll,
+      participants,
+      comments,
+      linkedParticipantIds,
+      viewerRole,
+      groupAccess,
+    }),
+    [
+      poll,
+      participants,
+      comments,
+      linkedParticipantIds,
+      viewerRole,
+      groupAccess,
+    ],
   );
 
   return <PollContext.Provider value={value}>{children}</PollContext.Provider>;
@@ -83,15 +102,23 @@ export const useParticipants = () => {
   return { participants };
 };
 
+export const useGroupAccess = () => useRequiredContext(PollContext).groupAccess;
+
 export const usePermissions = () => {
-  const { poll, participants, linkedParticipantIds, viewerRole } =
+  const { poll, participants, linkedParticipantIds, viewerRole, groupAccess } =
     useRequiredContext(PollContext);
   const { user } = useUser();
+  // Mirrors the check in the vote actions, which have the final say.
+  const groupAllows = groupAccess === "open" || groupAccess === "allowed";
 
   return {
-    canAddNewParticipant: poll.status === "open",
+    canAddNewParticipant: poll.status === "open" && groupAllows,
     canEditParticipant: (participantId: string) => {
       if (poll.status !== "open") {
+        return false;
+      }
+
+      if (!groupAllows) {
         return false;
       }
 

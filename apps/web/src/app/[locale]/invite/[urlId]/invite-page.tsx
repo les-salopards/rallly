@@ -6,6 +6,7 @@ import { ResponsiveResults } from "@/features/poll/components/responsive-results
 import { VotingForm } from "@/features/poll/components/voting-form";
 import { CreatorBanner } from "@/features/poll/invite/components/creator-banner";
 import { FloatingComments } from "@/features/poll/invite/components/floating-comments";
+import { GroupRestrictionBanner } from "@/features/poll/invite/components/group-restriction-banner";
 import { useHydrated } from "@/lib/datetime/use-hydrated";
 
 /**
@@ -37,6 +38,7 @@ export function InvitePage({
         className="mx-auto w-full max-w-4xl space-y-3"
       >
         <CreatorBanner />
+        <GroupRestrictionBanner />
         <EventCard />
         <VotingForm>
           <ResponsiveResults />

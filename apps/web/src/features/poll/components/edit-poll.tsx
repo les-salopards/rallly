@@ -93,6 +93,7 @@ function getDefaultValues(poll: PollDetails): NewEventData {
     enableComments: !poll.disableComments,
     allowTentativeVotes: poll.allowTentativeVotes,
     requireParticipantEmail: poll.requireParticipantEmail,
+    allowedGroup: poll.allowedGroup ?? "",
   };
 }
 
@@ -166,6 +167,7 @@ const settingFields = [
   "enableComments",
   "allowTentativeVotes",
   "requireParticipantEmail",
+  "allowedGroup",
 ] as const;
 
 /**
@@ -234,6 +236,7 @@ export function EditPoll({
       input.disableComments = !data.enableComments;
       input.allowTentativeVotes = data.allowTentativeVotes;
       input.requireParticipantEmail = data.requireParticipantEmail;
+      input.allowedGroup = data.allowedGroup;
     }
 
     if (!detailsChanged && !dateChanges && !settingsChanged) {
