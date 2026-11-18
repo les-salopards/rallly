@@ -11,6 +11,7 @@ import { VisibilityProvider } from "@/features/poll/components/visibility";
 import { InviteOpenRecorder } from "@/features/poll/invite/components/invite-open-recorder";
 import { PollUnavailable } from "@/features/poll/invite/components/poll-unavailable";
 import { loadInvitePoll, loadPollAvailability } from "@/features/poll/loaders";
+import { isOidcVoteRequired } from "@/features/poll/oidc-vote/constants";
 import { UserProvider } from "@/features/user/client";
 import { getLocale } from "@/i18n/server/get-locale";
 import { DeviceDateTimeProvider } from "@/lib/datetime/device";
@@ -80,6 +81,7 @@ async function InvitePageContent({ params, searchParams }: PageProps) {
             comments={comments}
             linkedParticipantIds={linkedParticipantIds}
             viewerRole="participant"
+            identityLocked={isOidcVoteRequired()}
             groupAccess={groupAccess}
           >
             <LegacyPollContextProvider>

@@ -6,6 +6,7 @@ import { resolveSpaceTier } from "@/features/billing/utils";
 import { PollProvider } from "@/features/poll/client";
 import { PollLayout } from "@/features/poll/components/poll-layout";
 import { loadAdminPoll, loadPollAvailability } from "@/features/poll/loaders";
+import { isOidcVoteRequired } from "@/features/poll/oidc-vote/constants";
 
 async function AdminPollLayout({
   params,
@@ -28,6 +29,7 @@ async function AdminPollLayout({
         participants={participants}
         comments={comments}
         viewerRole="admin"
+        identityLocked={isOidcVoteRequired()}
       >
         <PollLayout>{children}</PollLayout>
       </PollProvider>
