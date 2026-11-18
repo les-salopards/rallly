@@ -34,6 +34,8 @@ export const env = createEnv({
     OIDC_EMAIL_CLAIM_PATH: z.string().default("email"),
     OIDC_NAME_CLAIM_PATH: z.string().default("name"),
     OIDC_PICTURE_CLAIM_PATH: z.string().default("picture"),
+    /** Claim listing the user's groups, used by group-restricted polls. */
+    OIDC_GROUPS_CLAIM_PATH: z.string().default("groups"),
     /**
      * Email Provider
      * Choose which service provider to use for sending emails.
@@ -278,6 +280,7 @@ export const env = createEnv({
     OIDC_EMAIL_CLAIM_PATH: process.env.OIDC_EMAIL_CLAIM_PATH,
     OIDC_NAME_CLAIM_PATH: process.env.OIDC_NAME_CLAIM_PATH,
     OIDC_PICTURE_CLAIM_PATH: process.env.OIDC_PICTURE_CLAIM_PATH,
+    OIDC_GROUPS_CLAIM_PATH: process.env.OIDC_GROUPS_CLAIM_PATH,
     EMAIL_PROVIDER: process.env.EMAIL_PROVIDER,
     SMTP_HOST: process.env.SMTP_HOST,
     SMTP_USER: process.env.SMTP_USER,

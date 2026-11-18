@@ -35,6 +35,7 @@ import {
   getPolls,
   hasPollAdminAccess,
 } from "@/features/poll/data";
+import { normalizeAllowedGroup } from "@/features/poll/group-access/utils";
 import { MAX_POLL_DESCRIPTION_LENGTH } from "@/features/poll/schema";
 import {
   getFinalizePlanGate,
@@ -70,6 +71,17 @@ import { getScheduledEventTimes } from "./polls/scheduled-event-times";
 import { timeZoneInput } from "./polls/schema";
 
 const collapseNewlines = (s: string) => s.replace(/\n{3,}/g, "\n\n");
+
+// The OIDC group a poll is reserved to. Blank clears it, so the form can send
+// its text field as is; undefined leaves the stored value untouched.
+const allowedGroupInput = z
+  .string()
+  .max(100)
+  .nullable()
+  .optional()
+  .transform((value) =>
+    value === undefined ? undefined : normalizeAllowedGroup(value),
+  );
 
 // Mirrors the auto-close-polls house-keeping task: an option ends at
 // start + duration, with all-day options (duration 0) treated as 24h.
@@ -216,6 +228,7 @@ export const polls = router({
         disableComments: z.boolean().optional(),
         allowTentativeVotes: z.boolean().optional(),
         requireParticipantEmail: z.boolean().optional(),
+        allowedGroup: allowedGroupInput,
         options: z
           .object({
             startDate: z.string(),
@@ -345,6 +358,7 @@ export const polls = router({
             allowTentativeVotes: input.allowTentativeVotes,
             hideScores: input.hideScores,
             requireParticipantEmail: input.requireParticipantEmail,
+            allowedGroup: input.allowedGroup,
             spaceId,
           },
         });
@@ -455,6 +469,7 @@ export const polls = router({
         allowTentativeVotes: z.boolean().optional(),
         hideScores: z.boolean().optional(),
         requireParticipantEmail: z.boolean().optional(),
+        allowedGroup: allowedGroupInput,
       }),
     )
     .use(requireUserMiddleware)
@@ -695,6 +710,7 @@ export const polls = router({
             disableComments: input.disableComments,
             allowTentativeVotes: input.allowTentativeVotes,
             requireParticipantEmail: input.requireParticipantEmail,
+            allowedGroup: input.allowedGroup,
             kind,
           },
         });
@@ -859,7 +875,8 @@ export const polls = router({
         input.disableComments !== undefined ||
         input.allowTentativeVotes !== undefined ||
         input.hideScores !== undefined ||
-        input.requireParticipantEmail !== undefined;
+        input.requireParticipantEmail !== undefined ||
+        input.allowedGroup !== undefined;
 
       if (hasDetailsUpdate) {
         track(ctx.user, {

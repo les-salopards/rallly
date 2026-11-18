@@ -10,6 +10,7 @@ import {
   FieldLabel,
 } from "@rallly/ui/field";
 import { FormField } from "@rallly/ui/form";
+import { Input } from "@rallly/ui/input";
 import {
   Select,
   SelectContent,
@@ -22,6 +23,7 @@ import { VoteIcon } from "@rallly/ui/vote-icon";
 import {
   BarChart2Icon,
   ListChecksIcon,
+  LockIcon,
   MailIcon,
   MessageCircleIcon,
   VenetianMaskIcon,
@@ -32,7 +34,7 @@ import { showPayWall, useIsFree } from "@/features/billing/client";
 import { ProBadge } from "@/features/billing/components/pro-badge";
 import type { PollSettingsFormData } from "@/features/poll/components/forms/types";
 import type { VoteType } from "@/features/poll/constants";
-import { Trans } from "@/i18n/client";
+import { Trans, useTranslation } from "@/i18n/client";
 
 /**
  * Each answer as its icon plus its name, so the choice shows exactly what a
@@ -73,6 +75,7 @@ export const PollSettingsForm = ({
 }>) => {
   const form = useFormContext<PollSettingsFormData>();
   const isFree = useIsFree();
+  const { t } = useTranslation();
 
   return (
     <Card>
@@ -322,6 +325,44 @@ export const PollSettingsForm = ({
                 </Field>
               );
             }}
+          />
+          <FormField
+            control={form.control}
+            name="allowedGroup"
+            render={({ field }) => (
+              <Field
+                orientation="responsive"
+                className="@md/field-group:gap-2 gap-4"
+              >
+                <SettingIcon>
+                  <LockIcon />
+                </SettingIcon>
+                <FieldContent>
+                  <FieldLabel htmlFor="allowed-group">
+                    <Trans
+                      i18nKey="allowedGroupSettingTitle"
+                      defaults="Restrict to a group"
+                    />
+                  </FieldLabel>
+                  <FieldDescription>
+                    <Trans
+                      i18nKey="allowedGroupSettingDescription"
+                      defaults="Only members of this single sign-on group can respond. Leave empty to let anyone respond."
+                    />
+                  </FieldDescription>
+                </FieldContent>
+                <Input
+                  id="allowed-group"
+                  className="@md/field-group:w-48"
+                  maxLength={100}
+                  placeholder={t("allowedGroupPlaceholder", {
+                    defaultValue: "e.g. rallly-users",
+                  })}
+                  {...field}
+                  value={field.value ?? ""}
+                />
+              </Field>
+            )}
           />
         </FieldGroup>
       </CardContent>

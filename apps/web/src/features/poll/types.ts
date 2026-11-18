@@ -17,6 +17,8 @@ export type PollDetails = {
   hideParticipants: boolean;
   disableComments: boolean;
   allowTentativeVotes: boolean;
+  /** OIDC group whose members alone may respond; null when open to all. */
+  allowedGroup: string | null;
   hideScores: boolean;
   requireParticipantEmail: boolean;
   muted: boolean;
