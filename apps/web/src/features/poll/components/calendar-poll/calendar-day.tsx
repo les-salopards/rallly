@@ -11,6 +11,8 @@ export type CalendarSlotModel = {
   label: string | null;
   /** Full time range of a time slot; null for an all-day option. */
   range: string | null;
+  /** Full date and time of the option, for screen readers. */
+  optionLabel: string;
   score: number | null;
   vote?: VoteType;
 };
@@ -24,6 +26,7 @@ export type CalendarSlotHandlers = {
 export function CalendarSlotList({
   slots,
   full = false,
+  fill = false,
   editable,
   allowTentativeVotes,
   onVote,
@@ -31,14 +34,18 @@ export function CalendarSlotList({
   slots: CalendarSlotModel[];
   /** Show each slot's full time range instead of its start time. */
   full?: boolean;
+  /** Stretch the slots over the cell (an all-day option is the whole day). */
+  fill?: boolean;
 } & CalendarSlotHandlers) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className={cn("flex flex-col gap-1", fill && "flex-1")}>
       {slots.map((slot) => (
         <CalendarSlot
           key={slot.optionId}
           label={full ? slot.range : slot.label}
           title={slot.range ?? undefined}
+          optionLabel={slot.optionLabel}
+          className={fill ? "h-full flex-1 justify-center" : undefined}
           score={slot.score}
           vote={slot.vote}
           editable={editable}
@@ -90,7 +97,13 @@ export function CalendarDay({
       >
         {Number(date.slice(8))}
       </span>
-      {offered ? <CalendarSlotList slots={visible} {...handlers} /> : null}
+      {offered ? (
+        <CalendarSlotList
+          slots={visible}
+          fill={slots.length === 1 && slots[0].label === null}
+          {...handlers}
+        />
+      ) : null}
       {hidden > 0 ? (
         <Popover>
           <PopoverTrigger

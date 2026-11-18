@@ -9,7 +9,7 @@ import { TimesShownIn } from "@/components/clock";
 import { usePoll } from "@/features/poll/components/poll-context";
 import { useTranslation } from "@/i18n/client";
 import { formatDate } from "@/lib/datetime/format";
-import { getLocaleDefaults, getWeekdayNames } from "@/lib/datetime/locales";
+import { getWeekdayNames } from "@/lib/datetime/locales";
 import { CalendarDay, CalendarSlotList } from "./calendar-day";
 import { CalendarResponseControls } from "./calendar-response-controls";
 import { useCalendarModel } from "./use-calendar-model";
@@ -41,8 +41,12 @@ export function CalendarPoll() {
   );
   const [selectedDay, setSelectedDay] = React.useState<string | null>(null);
 
-  const weeks = getMonthWeeks(month, getLocaleDefaults(locale).weekStart);
-  const weekdays = getWeekdayNames(locale);
+  // The viewer's week start (their preference, else their locale's).
+  const weeks = getMonthWeeks(month, model.weekStart);
+  const weekdays = [...getWeekdayNames(locale)].sort(
+    (a, b) =>
+      ((a.day - model.weekStart + 7) % 7) - ((b.day - model.weekStart + 7) % 7),
+  );
   const offeredDays = new Set(model.days);
   // Compact view: the picked day, else the month's first offered day.
   const activeDay =
