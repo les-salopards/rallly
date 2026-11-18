@@ -863,5 +863,13 @@
   "you": "Vous",
   "youAreSignedInAs": "Vous êtes connecté en tant que",
   "yourApiKey": "Votre clé API",
-  "yourName": "Votre nom…"
+  "yourName": "Votre nom…",
+  "calendarViewSwitcher": "Affichage",
+  "calendarViewTable": "Tableau",
+  "calendarViewCalendar": "Calendrier",
+  "calendarMoreOptions": "+{count} autres",
+  "calendarEditResponse": "Modifier ma réponse",
+  "calendarRespond": "Répondre",
+  "calendarPreviousMonth": "Mois précédent",
+  "calendarNextMonth": "Mois suivant"
 }
