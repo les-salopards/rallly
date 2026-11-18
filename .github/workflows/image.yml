@@ -1,4 +1,4 @@
-# Fork CI: type check and unit tests, then the self-hosted image.
+# Fork CI: lint, type check and unit tests, then the self-hosted image.
 # Pull requests build the image without pushing it. Pushes to main publish it
 # to GHCR (sha-<short sha> and latest) and scan it with the shared security
 # scan of projet-infra, which the Compose stack and the VM then pull.
@@ -23,12 +23,19 @@ env:
 
 jobs:
   check:
-    name: Type check and unit tests
+    name: Lint, type check and unit tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-node
       - uses: ./.github/actions/pnpm-install
+
+      # Same static checks as upstream's ci.yml linting job.
+      - name: Check linting rules
+        run: pnpm turbo check
+
+      - name: Check feature folder structure, locales and cascades
+        run: pnpm check:structure && pnpm check:locales && pnpm check:cascades
 
       - name: Generate Prisma Client
         run: pnpm db:generate
