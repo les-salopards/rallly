@@ -1172,5 +1172,13 @@
   "you": "You",
   "youAreSignedInAs": "You're signed in as",
   "yourApiKey": "Your API key",
-  "yourName": "Your name…"
+  "yourName": "Your name…",
+  "calendarViewSwitcher": "View",
+  "calendarViewTable": "Table",
+  "calendarViewCalendar": "Calendar",
+  "calendarMoreOptions": "+{count} more",
+  "calendarEditResponse": "Edit my response",
+  "calendarRespond": "Respond",
+  "calendarPreviousMonth": "Previous month",
+  "calendarNextMonth": "Next month"
 }
