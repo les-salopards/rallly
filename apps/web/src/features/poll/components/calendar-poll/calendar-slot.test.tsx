@@ -51,4 +51,11 @@ describe("CalendarSlot", () => {
     expect(button.textContent).toContain("10:00");
     expect(button.textContent).toContain("3");
   });
+
+  it("hides the score when the poll hides scores", () => {
+    const { button } = renderSlot({ score: null });
+
+    expect(button.textContent).toContain("10:00");
+    expect(button.textContent).not.toContain("3");
+  });
 });

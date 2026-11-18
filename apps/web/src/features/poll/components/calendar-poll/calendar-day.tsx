@@ -9,7 +9,7 @@ export type CalendarSlotModel = {
   optionId: string;
   /** Time range of a time slot; null for an all-day option. */
   label: string | null;
-  score: number;
+  score: number | null;
   vote?: VoteType;
 };
 

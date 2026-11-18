@@ -1,4 +1,5 @@
 import {
+  findViewerParticipant,
   getInitialMonth,
   getMonthWeeks,
   groupOptionsByDay,
@@ -113,5 +114,42 @@ describe("splitVisible", () => {
 
   it("shows everything when there are three or fewer", () => {
     expect(splitVisible([1, 2])).toEqual({ visible: [1, 2], hidden: 0 });
+  });
+});
+
+describe("findViewerParticipant", () => {
+  const participants = [
+    { id: "bob", userId: "user-bob" },
+    { id: "alice", userId: "user-alice" },
+  ];
+
+  it("finds the response the viewer's account owns", () => {
+    expect(
+      findViewerParticipant(participants, {
+        role: "participant",
+        owns: (p) => p.userId === "user-alice",
+        canEdit: () => false,
+      })?.id,
+    ).toBe("alice");
+  });
+
+  it("finds a response opened through its edit link", () => {
+    expect(
+      findViewerParticipant(participants, {
+        role: "participant",
+        owns: () => false,
+        canEdit: (id) => id === "bob",
+      })?.id,
+    ).toBe("bob");
+  });
+
+  it("never hands an admin someone else's response", () => {
+    expect(
+      findViewerParticipant(participants, {
+        role: "admin",
+        owns: () => false,
+        canEdit: () => true,
+      }),
+    ).toBeUndefined();
   });
 });
