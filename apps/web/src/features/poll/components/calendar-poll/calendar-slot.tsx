@@ -3,6 +3,7 @@ import { UsersIcon } from "lucide-react";
 import VoteIcon from "@/features/poll/components/vote-icon";
 import { toggleVote } from "@/features/poll/components/vote-selector";
 import type { VoteType } from "@/features/poll/constants";
+import { useTranslation } from "@/i18n/client";
 
 /**
  * One option inside a calendar day. While a response is being edited a click
@@ -11,6 +12,7 @@ import type { VoteType } from "@/features/poll/constants";
 export function CalendarSlot({
   label,
   title,
+  optionLabel,
   score,
   vote,
   editable,
@@ -22,6 +24,8 @@ export function CalendarSlot({
   label: string | null;
   /** The full time range, shown on hover. */
   title?: string;
+  /** The option's full date and time, read out by screen readers. */
+  optionLabel?: string;
   /** How many participants said yes; null when the poll hides scores. */
   score: number | null;
   vote?: VoteType;
@@ -30,10 +34,27 @@ export function CalendarSlot({
   onChange: (vote: VoteType) => void;
   className?: string;
 }) {
+  const { t } = useTranslation();
+  const voteLabel =
+    vote === "yes"
+      ? t("yes", { defaultValue: "Yes" })
+      : vote === "ifNeedBe"
+        ? t("ifNeedBe", { defaultValue: "If need be" })
+        : vote === "no"
+          ? t("no", { defaultValue: "No" })
+          : t("pending", { defaultValue: "Pending" });
+  const scoreLabel =
+    score === null
+      ? null
+      : `${score} ${t("calendarSlotYes", { defaultValue: "yes" })}`;
+
   return (
     <button
       type="button"
       title={title}
+      aria-label={[optionLabel ?? label, voteLabel, scoreLabel]
+        .filter(Boolean)
+        .join(", ")}
       disabled={!editable}
       onClick={() => onChange(toggleVote(vote, allowTentativeVotes))}
       className={cn(

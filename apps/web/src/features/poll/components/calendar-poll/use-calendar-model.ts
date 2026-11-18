@@ -11,7 +11,10 @@ import type { VoteType } from "@/features/poll/constants";
 import { useUser } from "@/features/user/client";
 import { useDateTimeConfig } from "@/lib/datetime/client";
 import { getCalendarDate } from "@/lib/datetime/utils";
-import { getBrowserTimeZone } from "@/lib/utils/date-time-utils";
+import {
+  getBrowserTimeZone,
+  getOptionDateTimeLabel,
+} from "@/lib/utils/date-time-utils";
 import type { CalendarSlotModel } from "./calendar-day";
 import { findViewerParticipant, groupOptionsByDay } from "./utils";
 
@@ -26,7 +29,7 @@ export function useCalendarModel() {
   const { participants } = useParticipants();
   const { ownsObject } = useUser();
   const votingForm = useVotingForm();
-  const { timeZone, locale } = useDateTimeConfig();
+  const { timeZone, locale, weekStart } = useDateTimeConfig();
   const viewerTimeZone = timeZone ?? getBrowserTimeZone();
 
   const mode = votingForm.watch("mode");
@@ -59,8 +62,13 @@ export function useCalendarModel() {
             ? {
                 label: option.startTime,
                 range: `${option.startTime} – ${option.endTime}`,
+                optionLabel: getOptionDateTimeLabel(option),
               }
-            : { label: null, range: null },
+            : {
+                label: null,
+                range: null,
+                optionLabel: getOptionDateTimeLabel(option),
+              },
         ]),
       ),
     [options],
@@ -83,6 +91,7 @@ export function useCalendarModel() {
         optionId,
         label: labels.get(optionId)?.label ?? null,
         range: labels.get(optionId)?.range ?? null,
+        optionLabel: labels.get(optionId)?.optionLabel ?? "",
         score: canSeeScores ? getScore(optionId).yes : null,
         vote,
       };
@@ -98,6 +107,7 @@ export function useCalendarModel() {
 
   return {
     locale,
+    weekStart,
     today: getCalendarDate(new Date(), viewerTimeZone),
     days: [...days.keys()],
     getSlots,

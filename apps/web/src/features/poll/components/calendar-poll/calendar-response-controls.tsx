@@ -8,7 +8,7 @@ import {
 import { VotingFooter } from "@/features/poll/components/voting-footer";
 import { useVotingForm } from "@/features/poll/components/voting-form";
 import { useUser } from "@/features/user/client";
-import { Trans } from "@/i18n/client";
+import { Trans, useTranslation } from "@/i18n/client";
 import { findViewerParticipant } from "./utils";
 
 /**
@@ -17,6 +17,7 @@ import { findViewerParticipant } from "./utils";
  * which submits the same voting form and therefore the same server actions.
  */
 export function CalendarResponseControls() {
+  const { t } = useTranslation();
   const votingForm = useVotingForm();
   const { participants } = useParticipants();
   const { ownsObject } = useUser();
@@ -32,11 +33,9 @@ export function CalendarResponseControls() {
   if (mode !== "view") {
     return (
       <div className="flex flex-wrap items-center justify-end gap-2 border-t p-3">
-        {mode === "edit" ? (
-          <Button variant="ghost" onClick={() => votingForm.cancel()}>
-            <Trans i18nKey="cancel" defaults="Cancel" />
-          </Button>
-        ) : null}
+        <Button variant="ghost" onClick={() => votingForm.cancel()}>
+          {t("cancel", { defaultValue: "Cancel" })}
+        </Button>
         <VotingFooter />
       </div>
     );
