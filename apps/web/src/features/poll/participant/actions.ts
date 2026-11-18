@@ -19,6 +19,9 @@ import {
   isGroupAccessDenied,
 } from "@/features/poll/group-access/data";
 import { getPollInvitePath } from "@/features/poll/invite/utils";
+import { isOidcVoteRequired } from "@/features/poll/oidc-vote/constants";
+import { getAccountIdentity } from "@/features/poll/oidc-vote/data";
+import { resolveVoterIdentity } from "@/features/poll/oidc-vote/utils";
 import {
   addParticipant,
   deleteParticipant,
@@ -182,13 +185,24 @@ export const addParticipantAction = anyUserActionClient
   .use(createRateLimitMiddleware(10, "1 h"))
   .inputSchema(addParticipantSchema)
   .action(async ({ ctx, parsedInput }) => {
-    const { pollId, votes, name, email, note, timeZone, token } = parsedInput;
+    const { pollId, votes, note, timeZone, token } = parsedInput;
 
     // A poll reserved to an OIDC group only takes responses from its members.
     const groupAccess = await getPollGroupAccess({ pollId, user: ctx.user });
     if (isGroupAccessDenied(groupAccess)) {
       return { ok: false as const, reason: groupAccess };
     }
+
+    const oidcRequired = isOidcVoteRequired();
+    const identity = resolveVoterIdentity({
+      required: oidcRequired,
+      typed: { name: parsedInput.name, email: parsedInput.email },
+      account: oidcRequired ? await getAccountIdentity(ctx.user.id) : null,
+    });
+    if (!identity) {
+      return { ok: false as const, reason: "loginRequired" as const };
+    }
+    const { name, email } = identity;
 
     const locale = await getLocale();
 
@@ -324,6 +338,14 @@ export const renameParticipantAction = optionalUserActionClient
   .inputSchema(renameParticipantSchema)
   .action(async ({ ctx, parsedInput }) => {
     const { participantId, name, token } = parsedInput;
+
+    // The name comes from the IdP and stays tied to the response.
+    if (isOidcVoteRequired()) {
+      throw new AppError({
+        code: "FORBIDDEN",
+        message: "Responses keep the name from the identity provider",
+      });
+    }
 
     const authorization = await authorizeParticipantEdit({
       participantId,

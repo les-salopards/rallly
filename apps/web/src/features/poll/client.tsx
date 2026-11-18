@@ -23,6 +23,8 @@ type PollContextValue = {
   viewerRole: "admin" | "participant";
   /** The viewer's standing on a poll reserved to an OIDC group. */
   groupAccess: GroupAccess;
+  /** OIDC_VOTE_REQUIRED: responses carry the IdP name and email, fixed. */
+  identityLocked: boolean;
 };
 
 const PollContext = React.createContext<PollContextValue | null>(null);
@@ -41,10 +43,15 @@ export function PollProvider({
   linkedParticipantIds = [],
   viewerRole,
   groupAccess = "open",
+  identityLocked = false,
   children,
-}: Omit<PollContextValue, "linkedParticipantIds" | "groupAccess"> & {
+}: Omit<
+  PollContextValue,
+  "linkedParticipantIds" | "groupAccess" | "identityLocked"
+> & {
   linkedParticipantIds?: string[];
   groupAccess?: GroupAccess;
+  identityLocked?: boolean;
   children: React.ReactNode;
 }) {
   const value = React.useMemo(
@@ -55,6 +62,7 @@ export function PollProvider({
       linkedParticipantIds,
       viewerRole,
       groupAccess,
+      identityLocked,
     }),
     [
       poll,
@@ -63,6 +71,7 @@ export function PollProvider({
       linkedParticipantIds,
       viewerRole,
       groupAccess,
+      identityLocked,
     ],
   );
 
@@ -103,6 +112,9 @@ export const useParticipants = () => {
 };
 
 export const useGroupAccess = () => useRequiredContext(PollContext).groupAccess;
+
+export const useIdentityLocked = () =>
+  React.useContext(PollContext)?.identityLocked ?? false;
 
 export const usePermissions = () => {
   const { poll, participants, linkedParticipantIds, viewerRole, groupAccess } =

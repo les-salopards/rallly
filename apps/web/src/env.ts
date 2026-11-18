@@ -37,6 +37,11 @@ export const env = createEnv({
     /** Claim listing the user's groups, used by group-restricted polls. */
     OIDC_GROUPS_CLAIM_PATH: z.string().default("groups"),
     /**
+     * When "true", only users signed in through OIDC may vote, under the
+     * name and email asserted by the IdP. Anyone can still view polls.
+     */
+    OIDC_VOTE_REQUIRED: z.enum(["true", "false"]).default("false"),
+    /**
      * Email Provider
      * Choose which service provider to use for sending emails.
      * Make sure to configure the corresponding environment variables.
@@ -281,6 +286,7 @@ export const env = createEnv({
     OIDC_NAME_CLAIM_PATH: process.env.OIDC_NAME_CLAIM_PATH,
     OIDC_PICTURE_CLAIM_PATH: process.env.OIDC_PICTURE_CLAIM_PATH,
     OIDC_GROUPS_CLAIM_PATH: process.env.OIDC_GROUPS_CLAIM_PATH,
+    OIDC_VOTE_REQUIRED: process.env.OIDC_VOTE_REQUIRED,
     EMAIL_PROVIDER: process.env.EMAIL_PROVIDER,
     SMTP_HOST: process.env.SMTP_HOST,
     SMTP_USER: process.env.SMTP_USER,
