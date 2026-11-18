@@ -59,7 +59,7 @@ export function shiftMonth(month: string, delta: number): string {
 /** The month's weeks, padded with null outside the month. */
 export function getMonthWeeks(
   month: string,
-  weekStartsOn: 0 | 1,
+  weekStartsOn: number,
 ): (string | null)[][] {
   const { year, monthIndex } = parseMonth(month);
   const daysInMonth = new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
