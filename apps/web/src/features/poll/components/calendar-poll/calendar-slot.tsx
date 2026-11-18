@@ -10,6 +10,7 @@ import type { VoteType } from "@/features/poll/constants";
  */
 export function CalendarSlot({
   label,
+  title,
   score,
   vote,
   editable,
@@ -17,8 +18,10 @@ export function CalendarSlot({
   onChange,
   className,
 }: {
-  /** The slot's time range; null for an all-day option. */
+  /** What the slot shows: its start time; null for an all-day option. */
   label: string | null;
+  /** The full time range, shown on hover. */
+  title?: string;
   /** How many participants said yes; null when the poll hides scores. */
   score: number | null;
   vote?: VoteType;
@@ -30,6 +33,7 @@ export function CalendarSlot({
   return (
     <button
       type="button"
+      title={title}
       disabled={!editable}
       onClick={() => onChange(toggleVote(vote, allowTentativeVotes))}
       className={cn(

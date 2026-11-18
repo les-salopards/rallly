@@ -7,8 +7,10 @@ import { splitVisible } from "./utils";
 
 export type CalendarSlotModel = {
   optionId: string;
-  /** Time range of a time slot; null for an all-day option. */
+  /** Start time of a time slot; null for an all-day option. */
   label: string | null;
+  /** Full time range of a time slot; null for an all-day option. */
+  range: string | null;
   score: number | null;
   vote?: VoteType;
 };
@@ -21,16 +23,22 @@ export type CalendarSlotHandlers = {
 
 export function CalendarSlotList({
   slots,
+  full = false,
   editable,
   allowTentativeVotes,
   onVote,
-}: { slots: CalendarSlotModel[] } & CalendarSlotHandlers) {
+}: {
+  slots: CalendarSlotModel[];
+  /** Show each slot's full time range instead of its start time. */
+  full?: boolean;
+} & CalendarSlotHandlers) {
   return (
     <div className="flex flex-col gap-1">
       {slots.map((slot) => (
         <CalendarSlot
           key={slot.optionId}
-          label={slot.label}
+          label={full ? slot.range : slot.label}
+          title={slot.range ?? undefined}
           score={slot.score}
           vote={slot.vote}
           editable={editable}
@@ -89,7 +97,7 @@ export function CalendarDay({
             render={
               <button
                 type="button"
-                className="cursor-pointer rounded-md px-1 text-left text-muted-foreground text-xs hover:bg-muted hover:text-foreground"
+                className="cursor-pointer rounded-md px-1 text-left font-medium text-primary text-xs hover:bg-muted"
               />
             }
           >
@@ -100,7 +108,7 @@ export function CalendarDay({
           </PopoverTrigger>
           <PopoverContent align="start" className="w-56">
             <p className="mb-2 font-medium text-sm">{dayLabel}</p>
-            <CalendarSlotList slots={slots} {...handlers} />
+            <CalendarSlotList slots={slots} full {...handlers} />
           </PopoverContent>
         </Popover>
       ) : null}
